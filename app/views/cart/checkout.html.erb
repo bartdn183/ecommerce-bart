@@ -1,0 +1,47 @@
+<h3>Thanks for Shopping with us!</h3>
+<p>Let's review your order:</p>
+
+<table class="table">
+	<thead>
+		<tr>
+			<th>Product</th>
+			<th>Quantity</th>
+			<th>Unit Price</th>
+			<th>Total Price</th>
+		</tr>
+	</thead>
+	<tbody>
+			<% @order.order_items.each do |key, value| %>
+				<tr>	
+					<td><%= Product.find(key).name %></td>
+					<td><%= value %></td>
+					<td><%= number_to_currency Product.find(key).price %></td>
+					<td><%= number_to_currency Product.find(key).price * value %></td>
+				</tr>
+			<% end %>
+		</tbody>
+</table>
+
+
+
+<p>
+	<strong>Sub Total: </strong><%= number_to_currency(@order.subtotal) %><br>
+	<strong>Sales Tax: </strong><%= number_to_currency(@order.sales_tax) %><br>
+	<strong>Grand Total: </strong><%= number_to_currency(@order.grand_total) %><br>
+</p>
+<div style="display:inline-block;">
+	<%= link_to "Empty Cart", cancel_checkout_path(order_id: @order.id), method: :post, class: "btn btn-danger", data: { confirm: "Are You Sure?"} %>
+</div>
+
+<div style="display:inline-block;">
+	<%= form_tag order_complete_path do %>
+		<div>
+			<%= hidden_field_tag :order_id, @order.id %> 
+		</div>
+		<script src="https://checkout.stripe.com/checkout.js"
+		class="stripe-button"
+		data-key="<%= Rails.configuration.stripe[:publishable_key] %>"
+		data-description="Order #<%= @order.id %>"
+		data-amount="<%= (@order.grand_total.to_f.round(2) * 100) %>"></script>
+	<% end %>
+</div>
